@@ -1,7 +1,15 @@
 import logo from './logo.svg';
 import './App.css';
-import { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 
+//Renderiza somente ao carregar o pai pela primeira vez
+const Button = React.memo(function Button({ incrementButton }) {
+	return <button onClick={() => incrementButton(10)}>+10</button>;
+});
+Button.propTypes = {
+	incrementButton: PropTypes.func,
+};
 function App() {
 	const [reverse, setReverse] = useState(false);
 	const [counter, setCounter] = useState(0);
@@ -10,8 +18,40 @@ function App() {
 		setReverse(!reverse);
 	};
 	const handleIncrement = () => {
-		setCounter(counter + 1);
+		setCounter((counter) => counter + 1);
 	};
+	const incrementCounter = useCallback((num) => {
+		setCounter((counter) => counter + num);
+	}, []);
+
+	//Executa toda vez que o componete atualiza
+	//componentDidUpdate
+	useEffect(() => {
+		console.log('componentDidUpdate');
+	});
+	//Executa somente 1X
+	//componentDidMount
+	useEffect(() => {
+		console.log('componentDidMount');
+	}, []);
+	//Executa somente 1X
+	//componentDidMount
+	useEffect(() => {
+		document.querySelector('h4')?.addEventListener('click', eventFn);
+		//limpa o componete de eventos
+		return () => {
+			document.querySelector('h4')?.removeEventListener('click', eventFn);
+		};
+	}, []);
+	//Executa toda vez que a dependencia mude
+	//componentDidMount
+	useEffect(() => {
+		console.log('Contador mudou para', counter);
+	}, [counter]);
+
+	function eventFn() {
+		console.log('h4 Clicado');
+	}
 	return (
 		<div className="App">
 			<header className="App-header">
@@ -19,13 +59,13 @@ function App() {
 				<h4>Counter {counter}</h4>
 				<p>
 					<button type="button" onClick={handleClick}>
-						Reverse {reverseClass}
+						<code>{'<-->'}</code>
 					</button>
-				</p>
-				<p>
+
 					<button type="button" onClick={handleIncrement}>
-						Reverse {counter}
+						<code>{'+'}</code>
 					</button>
+					<Button incrementButton={incrementCounter} />
 				</p>
 			</header>
 		</div>
